@@ -1,0 +1,17 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+    container_name: crop-disease-app
+    ports:
+      - "8501:8501"
+    environment:
+      MODEL_PATH: /app/crop_disease_model.h5
+      LABEL_MAP_PATH: /app/label_map.json
+      TRAIN_DIR: /app/dataset/train
+      VAL_DIR: /app/dataset/val
+    volumes:
+      - .:/app
+    command: streamlit run app.py --server.address 0.0.0.0 --server.port 8501 --server.headless true

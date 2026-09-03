@@ -1,0 +1,25 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+.env
+prediction_history.json
+*.h5
+*.keras
+*.pkl
+*.joblib
+*.zip
+*.tar
+*.gz
+*.csv
+*.log
+dataset/
+large-models/
+
+# Local generated files
+crop_disease_model.h5
+test_leaf.jpg
+evaluation_report.txt
