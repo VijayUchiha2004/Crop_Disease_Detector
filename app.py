@@ -57,7 +57,7 @@ def load_model_and_labels():
             f"Label map not found: {LABEL_MAP_PATH}. Ensure the generated label map is available."
         )
 
-    model = tf.keras.models.load_model(str(MODEL_PATH))
+    model = tf.keras.models.load_model(str(MODEL_PATH), compile=False)
     with LABEL_MAP_PATH.open("r", encoding="utf-8") as file:
         raw_label_map = json.load(file)
     label_map = {int(v): k for k, v in raw_label_map.items()}
