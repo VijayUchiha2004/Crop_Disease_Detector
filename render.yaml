@@ -8,5 +8,7 @@ services:
     startCommand: streamlit run app.py --server.address 0.0.0.0 --server.port $PORT --server.headless true
     healthCheckPath: /
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
       - key: MODEL_URL
         value: https://github.com/VijayUchiha2004/Crop_Disease_Detector/releases/download/v1.0.0/crop_disease_model.h5

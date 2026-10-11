@@ -61,6 +61,7 @@ docker run -p 8501:8501 -v ${PWD}:/app crop-disease-app
    - `LABEL_MAP_PATH`
 
 ## Deployment notes
+- Render is pinned to Python 3.11.9 because the configured TensorFlow versions do not support Python 3.14.
 - The app expects a trained model and `label_map.json`. If the model file is missing and `MODEL_URL` is set, it downloads the model once to `MODEL_PATH` before loading it.
 - The trained model is hosted as a downloadable asset on the [GitHub Releases page](https://github.com/VijayUchiha2004/Crop_Disease_Detector/releases).
 - `MODEL_URL` defaults to the `v1.0.0` release asset URL in `render.yaml` and `.env.example`. Keep that release asset filename as `crop_disease_model.h5`, or update the URL in both files.
