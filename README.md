@@ -16,7 +16,6 @@ A Streamlit app for predicting crop leaf diseases from uploaded images.
 - `treatments.py` — treatment messaging
 - `dataset/` — training/validation image folders
 - `label_map.json` — model class mapping
-- `crop_disease_model.h5` — trained model artifact
 
 ## Setup
 1. Create a virtual environment:
@@ -57,11 +56,13 @@ docker run -p 8501:8501 -v ${PWD}:/app crop-disease-app
    streamlit run app.py --server.address 0.0.0.0 --server.port $PORT --server.headless true
    ```
 5. Set environment variables if your model is stored outside the repo:
+   - `MODEL_URL` — public URL used to download the trained model when it is not already present
    - `MODEL_PATH`
    - `LABEL_MAP_PATH`
 
 ## Deployment notes
-- The app expects a trained model at `crop_disease_model.h5` and a label map at `label_map.json`.
-- In production, mount or copy the model artifact into the container before starting the app.
-- For cloud deployment, configure the `MODEL_PATH` and `LABEL_MAP_PATH` environment variables if you store the model outside the project root.
-- Render free web services do not support persistent storage, so if the model file is not committed to the repo, store it in a release artifact or another cloud storage location and point `MODEL_PATH` to it.
+- The app expects a trained model and `label_map.json`. If the model file is missing and `MODEL_URL` is set, it downloads the model once to `MODEL_PATH` before loading it.
+- The trained model is hosted as a downloadable asset on the [GitHub Releases page](https://github.com/VijayUchiha2004/Crop_Disease_Detector/releases).
+- `MODEL_URL` defaults to the `v1.0.0` release asset URL in `render.yaml` and `.env.example`. Keep that release asset filename as `crop_disease_model.h5`, or update the URL in both files.
+- `MODEL_PATH` and `LABEL_MAP_PATH` can be configured when the model and labels are provided through mounted storage instead.
+- Render free web services do not provide persistent storage. The model is therefore downloaded to the instance at startup and may be downloaded again after an instance restart.

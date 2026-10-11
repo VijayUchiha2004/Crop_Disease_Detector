@@ -2,8 +2,12 @@ import csv
 import io
 import json
 import os
+import shutil
+import tempfile
 from datetime import datetime
 from pathlib import Path
+from urllib.error import URLError
+from urllib.request import urlopen
 
 import numpy as np
 import streamlit as st
@@ -19,9 +23,35 @@ HISTORY_PATH = BASE_DIR / "prediction_history.json"
 @st.cache_resource
 def load_model_and_labels():
     if not MODEL_PATH.exists():
-        raise FileNotFoundError(
-            f"Model file not found: {MODEL_PATH}. Train a model first with `python train_model.py` or set MODEL_PATH."
-        )
+        model_url = os.getenv("MODEL_URL")
+        if not model_url:
+            raise FileNotFoundError(
+                f"Model file not found: {MODEL_PATH}. Train a model first with `python train_model.py`, set MODEL_PATH, "
+                "or configure MODEL_URL to download a model."
+            )
+
+        MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
+        temporary_path = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                dir=MODEL_PATH.parent,
+                prefix=f".{MODEL_PATH.name}.",
+                suffix=".download",
+                delete=False,
+            ) as temporary_file:
+                temporary_path = Path(temporary_file.name)
+                with urlopen(model_url, timeout=120) as response:
+                    shutil.copyfileobj(response, temporary_file, length=1024 * 1024)
+
+            if temporary_path.stat().st_size == 0:
+                raise ValueError("The downloaded model file is empty.")
+            temporary_path.replace(MODEL_PATH)
+        except (OSError, URLError, ValueError) as exc:
+            raise RuntimeError(f"Unable to download model from MODEL_URL: {exc}") from exc
+        finally:
+            if temporary_path is not None:
+                temporary_path.unlink(missing_ok=True)
+
     if not LABEL_MAP_PATH.exists():
         raise FileNotFoundError(
             f"Label map not found: {LABEL_MAP_PATH}. Ensure the generated label map is available."
@@ -139,9 +169,9 @@ if "prediction_history" not in st.session_state:
 
 try:
     model, label_map = load_model_and_labels()
-except FileNotFoundError as exc:
+except (FileNotFoundError, RuntimeError) as exc:
     st.error(str(exc))
-    st.info("Once you have trained the model, run the app again or mount the model file into the deployment environment.")
+    st.info("Train a model locally, mount a model file, or configure MODEL_URL in the deployment environment.")
     st.stop()
 
 filters = st.sidebar.expander("Filter history")
